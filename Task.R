@@ -47,6 +47,7 @@ plot(bank_full$previous)
 max_prev <- which.max(bank_full$previous)
 bank_full[max_prev, ]
 bank_full <- bank_full[-max_prev, ]
+bank_full <-bank_full[, -13]
 
 bank_full <- bank_full %>% 
   mutate(age_group = cut(age, breaks = c(0, 30, 40, 50, 60, Inf), 
@@ -87,7 +88,7 @@ for (col in names(bank_full)) {
 # ------- Koreliacijos matrica
 library(corrplot)
 
-correlations <- cor(bank_full[, -c(2:5, 7:9, 11, 16:17)])
+correlations <- cor(bank_full[, -c(2:5, 7:9, 11, 15:17)])
 corrplot(correlations, type = "lower", method = "color", tl.col = "black",
          addCoef.col = "black", tl.cex=0.8, number.cex = 0.6)
 
@@ -108,7 +109,7 @@ summary(logit)
 library(performance)
 check_collinearity(logit)
 
-# Nereiksmingos: ("age", "default", "pdays")
+# Nereiksmingos: ("age", "default", "pdays", "age_group")
 
 # ------- Išskirtys
 par(mfrow=c(1,2))
@@ -123,12 +124,13 @@ plot(pearson_residuals, pch="*", cex=2, main="Pearson residuals")
 # train_data1 <- train_data[-residuals,]
 
 # ------ Modelio optimizavimas
-remove <- c("age", "default", "pdays")
+remove <- c("age", "default", "pdays","age_group")
 train_data1 <- train_data[, !names(train_data) %in% remove]
 logit_1 <- glm(formula = y ~ .,
                     family = binomial(logit), data = train_data1)
 
 summary(logit_1)
+check_collinearity(logit_1)
 
 # ------ Klasifikavimo matrica
 library(caret)
